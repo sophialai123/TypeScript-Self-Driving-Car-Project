@@ -11,6 +11,8 @@ interface AutonomousCar {
 
 interface AutonomousCarProps {
   isRunning?: boolean;
+  //type member named steeringControl of type Steering.
+  steeringControl: Steering;
 }
 
 
@@ -32,6 +34,7 @@ interface Control {
 // using the extends keyword.
 interface Steering extends Control {
   turn: (direction: string) => void;
+
 }
 
 
@@ -39,9 +42,13 @@ interface Steering extends Control {
 class Car implements AutonomousCar {
   //declare a property without any value.
   isRunning;
+  steeringControl;
+
 
   constructor(props: AutonomousCarProps) {
-    this.isRunning = props.isRunning
+    this.isRunning = props.isRunning;
+    this.steeringControl = props.steeringControl
+
   }
 
 
@@ -49,10 +56,20 @@ class Car implements AutonomousCar {
     if (!this.isRunning) {
       return console.log("The car is off")
     }
+    Object.keys(events).forEach(eventKey => {
+      if (!events[eventKey]) { return }
+
+
+      if (eventKey === "ObstacleLeft") {
+        this.steeringControl.turn("right")
+      }
+      if (eventKey === "ObstacleRight") {
+        this.steeringControl.turn("left")
+      }
+    })
 
   }
 }
-
 
 //create a class that handles steering
 class SteeringControl implements Steering {
@@ -60,17 +77,16 @@ class SteeringControl implements Steering {
     console.log(`Executing: ${command}`)
   }
   turn(direction: string) {
-    console.log(`Executing: turn ${direction}`)
+    this.execute(`turn ${direction}`)
+
   }
 }
 
 
 //a section for execution
-//isRunning is an object
-const autonomousCar = new Car({ isRunning: false });
-//console.log(autonomousCar.isRunning)
+const steering = new SteeringControl();
+const autonomousCar = new Car({ isRunning: true, steeringControl: steering }); //pass class as argument
 //pass a function call as an argument
 autonomousCar.respond(getObstacleEvents())
 
-const steering = new SteeringControl()
-steering.turn("right")
+
